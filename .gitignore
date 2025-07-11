@@ -3,3 +3,26 @@ node_modules
 /.cache
 /build
 .env
+
+# Worktrees
+/worktrees
+
+# Logs
+/logs
+*.log
+
+# Development tools
+.eslintcache
+.vscode
+.idea
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+/generated/prisma

@@ -1,0 +1,70 @@
+import { Form, Link } from "@remix-run/react";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
+import { Label } from "~/components/ui/label";
+
+interface LoginFormProps {
+  loading?: boolean;
+  error?: string;
+}
+
+export function LoginForm({ loading = false, error }: LoginFormProps) {
+  return (
+    <Card className="mx-auto w-full max-w-md">
+      <CardHeader>
+        <CardTitle className="text-center text-2xl">Sign In</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <Form method="post" className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Signing in..." : "Sign In"}
+          </Button>
+        </Form>
+
+        <div className="mt-6 text-center text-sm">
+          <p className="text-gray-600">
+            Don&apos;t have an account?{" "}
+            <Link
+              to="/register"
+              className="font-medium text-blue-600 hover:text-blue-700"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// Core Data Models for Laundry Calendar
+// ========================================
+
+// Users Model - User authentication and profile information
+model User {
+  id                     String  @id @default(cuid())
+  email                  String  @unique
+  emailVerified          Boolean @default(false)
+  emailVerificationToken String?
+  passwordHash           String
+  firstName              String
+  lastName               String
+  phoneNumber            String?
+  apartmentNumber        String?
+
+  // User preferences and settings
+  notificationPreferences NotificationPreferences @default(ALL)
+  timezone                String                  @default("UTC")
+  preferredLanguage       String                  @default("en")
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
+  // Relationships
+  reservations  Reservation[]
+  queueEntries  QueueEntry[]
+  sessions      Session[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+// Machines Model - Washer and dryer machine definitions
+model Machine {
+  id       String        @id @default(cuid())
+  name     String        @unique
+  type     MachineType
+  status   MachineStatus @default(AVAILABLE)
+  location String
+  capacity Int // in pounds
+
+  // Maintenance tracking
+  lastMaintenanceAt DateTime?
+  nextMaintenanceAt DateTime?
+  maintenanceNotes  String?
+  isOutOfOrder      Boolean   @default(false)
+  outOfOrderReason  String?
+
+  // Machine specifications
+  cycleTimeMinutes Int     @default(30) // default cycle time
+  energyRating     String?
+  manufacturer     String?
+  modelNumber      String?
+  serialNumber     String? @unique
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  reservations Reservation[]
+  queueEntries QueueEntry[]
+
+  @@map("machines")
+}
+
+// Reservations Model - Time slot bookings with conflict prevention
+model Reservation {
+  id String @id @default(cuid())
+
+  // Foreign keys
+  userId    String
+  machineId String
+
+  // Scheduling information
+  startTime         DateTime
+  endTime           DateTime
+  estimatedDuration Int // in minutes
+  actualDuration    Int? // in minutes, filled after completion
+
+  // Reservation details
+  status ReservationStatus @default(ACTIVE)
+  notes  String?
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  // Relationships
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  machine       Machine        @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  // Indexes for performance and conflict prevention
+  @@index([machineId, startTime, endTime])
+  @@index([userId, startTime])
+  @@index([status, startTime])
+  @@map("reservations")
+}
+
+// Queue Model - Waiting queue for machine availability
+model QueueEntry {
+  id String @id @default(cuid())
+
+  // Foreign keys
+  userId    String
+  machineId String? // null means any machine of preferred type
+
+  // Queue details
+  position            Int
+  machineType         MachineType?
+  preferredStartTime  DateTime?
+  estimatedWaitTime   Int? // in minutes
+  notifyWhenAvailable Boolean      @default(true)
+
+  // Status tracking
+  status     QueueStatus @default(WAITING)
+  joinedAt   DateTime    @default(now())
+  notifiedAt DateTime?
+  expiresAt  DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  machine       Machine?       @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  // Indexes for queue management
+  @@index([machineId, position])
+  @@index([userId, status])
+  @@index([status, joinedAt])
+  @@map("queue_entries")
+}
+
+// Sessions Model - User authentication sessions
+model Session {
+  id String @id @default(cuid())
+
+  // Foreign key
+  userId String
+
+  // Session details
+  token        String  @unique
+  refreshToken String? @unique
+  userAgent    String?
+  ipAddress    String?
+
+  // Session management
+  expiresAt      DateTime
+  lastActivityAt DateTime @default(now())
+  isActive       Boolean  @default(true)
+
+  // Security tracking
+  loginMethod       LoginMethod @default(PASSWORD)
+  twoFactorVerified Boolean     @default(false)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes for session management
+  @@index([userId, isActive])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// Notifications Model - Email notifications and delivery tracking
+model Notification {
+  id String @id @default(cuid())
+
+  // Foreign keys
+  userId        String
+  reservationId String?
+  queueEntryId  String?
+
+  // Notification details
+  type    NotificationType
+  title   String
+  message String
+
+  // Delivery tracking
+  status         NotificationStatus @default(PENDING)
+  deliveryMethod DeliveryMethod     @default(EMAIL)
+  recipientEmail String?
+  recipientPhone String?
+
+  // Retry logic
+  attempts      Int       @default(0)
+  maxAttempts   Int       @default(3)
+  lastAttemptAt DateTime?
+  nextRetryAt   DateTime?
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+
+  // Relationships
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  queueEntry  QueueEntry?  @relation(fields: [queueEntryId], references: [id], onDelete: SetNull)
+
+  // Indexes for notification management
+  @@index([userId, status])
+  @@index([type, status])
+  @@index([nextRetryAt])
+  @@map("notifications")
+}
+
+// ========================================
+// Enums for Type Safety and Validation
+// ========================================
+
+enum MachineType {
+  WASHER
+  DRYER
+}
+
+enum MachineStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  OUT_OF_ORDER
+}
+
+enum ReservationStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum QueueStatus {
+  WAITING
+  NOTIFIED
+  EXPIRED
+  CANCELLED
+}
+
+enum LoginMethod {
+  PASSWORD
+  GOOGLE
+  APPLE
+  FACEBOOK
+}
+
+enum NotificationType {
+  RESERVATION_CONFIRMED
+  RESERVATION_REMINDER
+  RESERVATION_CANCELLED
+  CYCLE_COMPLETE
+  QUEUE_POSITION_UPDATED
+  MACHINE_AVAILABLE
+  MAINTENANCE_SCHEDULED
+  SYSTEM_ANNOUNCEMENT
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum DeliveryMethod {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+}
+
+enum NotificationPreferences {
+  ALL
+  ESSENTIAL_ONLY
+  NONE
+}

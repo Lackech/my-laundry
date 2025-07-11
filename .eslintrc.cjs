@@ -22,19 +22,25 @@ module.exports = {
   ignorePatterns: ["!**/.server", "!**/.client"],
 
   // Base config
-  extends: ["eslint:recommended"],
+  extends: ["eslint:recommended", "prettier"],
 
   overrides: [
     // React
     {
       files: ["**/*.{js,jsx,ts,tsx}"],
-      plugins: ["react", "jsx-a11y"],
+      plugins: ["react", "jsx-a11y", "prettier"],
       extends: [
         "plugin:react/recommended",
         "plugin:react/jsx-runtime",
         "plugin:react-hooks/recommended",
         "plugin:jsx-a11y/recommended",
+        "plugin:prettier/recommended",
       ],
+      rules: {
+        "react/prop-types": "off", // TypeScript handles this
+        "jsx-a11y/heading-has-content": "off", // Allow empty headings for design systems
+        "jsx-a11y/label-has-associated-control": "off", // Allow standalone labels in design systems
+      },
       settings: {
         react: {
           version: "detect",
@@ -70,6 +76,7 @@ module.exports = {
         "plugin:@typescript-eslint/recommended",
         "plugin:import/recommended",
         "plugin:import/typescript",
+        "prettier",
       ],
     },
 
