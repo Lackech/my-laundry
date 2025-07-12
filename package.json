@@ -56,7 +56,9 @@
     "parallel:status": "./scripts/parallel-dev.sh status",
     "parallel:integrate": "./scripts/parallel-dev.sh integrate",
     "parallel:cleanup": "./scripts/parallel-dev.sh cleanup",
-    "parallel:terminals": "./scripts/parallel-dev.sh open-terminals"
+    "parallel:terminals": "./scripts/parallel-dev.sh open-terminals",
+    "parallel:setup-env": "./scripts/setup-worktree-env.sh",
+    "parallel:setup-all": "npm run parallel:setup-env worktrees/feature/calendar-integration && npm run parallel:setup-env worktrees/feature/machine-booking && npm run parallel:setup-env worktrees/feature/queue-management"
   },
   "dependencies": {
     "@playwright/test": "^1.54.0",

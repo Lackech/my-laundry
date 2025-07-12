@@ -70,9 +70,19 @@ setup_worktrees() {
     echo -e "  📁 $WORKTREE_DIR/$feature2"
     echo -e "  📁 $WORKTREE_DIR/$feature3"
     echo ""
+    echo -e "${BLUE}Setting up environments for all worktrees...${NC}"
+    
+    # Set up environment for each worktree
+    ./scripts/setup-worktree-env.sh "$WORKTREE_DIR/$feature1"
+    ./scripts/setup-worktree-env.sh "$WORKTREE_DIR/$feature2"
+    ./scripts/setup-worktree-env.sh "$WORKTREE_DIR/$feature3"
+    
+    echo ""
+    echo -e "${GREEN}All worktrees ready for development!${NC}"
     echo -e "${BLUE}Next steps:${NC}"
     echo -e "  1. Run: $0 open-terminals"
     echo -e "  2. Run: $0 start \"your implementation prompt\""
+    echo -e "  3. Each worktree now supports: npm run dev && npm test"
 }
 
 # Open terminal tabs for each worktree

@@ -7,9 +7,16 @@ This system allows you to run 3 implementation agents simultaneously using git w
 ### 1. Set Up Parallel Development Environment
 
 ```bash
-# Create 3 worktrees for parallel features
+# Create 3 worktrees for parallel features (fully automated setup)
 npm run parallel:setup calendar-integration machine-booking queue-management
 ```
+
+**✨ This now automatically handles:**
+- Git worktree creation
+- Environment variable setup (.env files)
+- Prisma client generation and database setup
+- Playwright browser installation
+- Dependencies installation
 
 ### 2. Open Multiple Terminal Sessions
 
@@ -29,7 +36,9 @@ npm run parallel:start "Implement a complete laundry booking system with calenda
 
 | Command | Description |
 |---------|-------------|
-| `npm run parallel:setup <f1> <f2> <f3>` | Create 3 parallel worktrees |
+| `npm run parallel:setup <f1> <f2> <f3>` | Create 3 parallel worktrees (fully automated) |
+| `npm run parallel:setup-env <worktree-path>` | Set up environment for individual worktree |
+| `npm run parallel:setup-all` | Set up environments for existing worktrees |
 | `npm run parallel:start "<prompt>"` | Show commands to start parallel agents |
 | `npm run parallel:status` | Check status of all development streams |
 | `npm run parallel:terminals` | Open terminal tabs for each worktree |
@@ -53,21 +62,24 @@ npm run parallel:terminals
 **Terminal 1 (User Dashboard):**
 ```bash
 cd worktrees/feature/user-dashboard
-# Use Claude with implementation agent
+# Environment is already set up - ready to code!
+npm run dev  # or npm test
 claude --agent implementation_agent "Implement user dashboard with profile management, preferences, and usage statistics"
 ```
 
 **Terminal 2 (Notifications):**
 ```bash
 cd worktrees/feature/notifications  
-# Use Claude with implementation agent
+# Environment is already set up - ready to code!
+npm run dev  # or npm test
 claude --agent implementation_agent "Implement notification system with email alerts, in-app notifications, and user preferences"
 ```
 
 **Terminal 3 (Admin Panel):**
 ```bash
 cd worktrees/feature/admin-panel
-# Use Claude with implementation agent
+# Environment is already set up - ready to code!
+npm run dev  # or npm test
 claude --agent implementation_agent "Implement admin dashboard with user management, machine monitoring, and system analytics"
 ```
 
