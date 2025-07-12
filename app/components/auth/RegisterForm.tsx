@@ -8,9 +8,10 @@ import { Label } from "~/components/ui/label";
 interface RegisterFormProps {
   loading?: boolean;
   error?: string;
+  fieldErrors?: Record<string, string>;
 }
 
-export function RegisterForm({ loading = false, error }: RegisterFormProps) {
+export function RegisterForm({ loading = false, error, fieldErrors }: RegisterFormProps) {
   return (
     <Card className="mx-auto w-full max-w-md">
       <CardHeader>
@@ -23,7 +24,7 @@ export function RegisterForm({ loading = false, error }: RegisterFormProps) {
           </Alert>
         )}
 
-        <Form method="post" className="space-y-4">
+        <Form method="post" className="space-y-4" noValidate>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
@@ -32,9 +33,11 @@ export function RegisterForm({ loading = false, error }: RegisterFormProps) {
                 name="firstName"
                 type="text"
                 placeholder="John"
-                required
                 disabled={loading}
               />
+              {fieldErrors?.firstName && (
+                <p className="text-sm text-red-600">{fieldErrors.firstName}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -44,9 +47,11 @@ export function RegisterForm({ loading = false, error }: RegisterFormProps) {
                 name="lastName"
                 type="text"
                 placeholder="Doe"
-                required
                 disabled={loading}
               />
+              {fieldErrors?.lastName && (
+                <p className="text-sm text-red-600">{fieldErrors.lastName}</p>
+              )}
             </div>
           </div>
 
@@ -57,9 +62,11 @@ export function RegisterForm({ loading = false, error }: RegisterFormProps) {
               name="email"
               type="email"
               placeholder="john@example.com"
-              required
               disabled={loading}
             />
+            {fieldErrors?.email && (
+              <p className="text-sm text-red-600">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -69,10 +76,11 @@ export function RegisterForm({ loading = false, error }: RegisterFormProps) {
               name="password"
               type="password"
               placeholder="Create a password"
-              minLength={8}
-              required
               disabled={loading}
             />
+            {fieldErrors?.password && (
+              <p className="text-sm text-red-600">{fieldErrors.password}</p>
+            )}
             <p className="text-sm text-gray-500">
               Password must be at least 8 characters long
             </p>
@@ -85,9 +93,11 @@ export function RegisterForm({ loading = false, error }: RegisterFormProps) {
               name="confirmPassword"
               type="password"
               placeholder="Confirm your password"
-              required
               disabled={loading}
             />
+            {fieldErrors?.confirmPassword && (
+              <p className="text-sm text-red-600">{fieldErrors.confirmPassword}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

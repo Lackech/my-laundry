@@ -27,23 +27,36 @@ export async function action({ request }: ActionFunctionArgs) {
     const phoneNumber = formData.get("phoneNumber") as string;
     const apartmentNumber = formData.get("apartmentNumber") as string;
 
-    // Basic validation
-    if (!email || !password || !firstName || !lastName) {
-      return json(
-        { error: "Email, password, first name, and last name are required" },
-        { status: 400 }
-      );
+    const fieldErrors: Record<string, string> = {};
+
+    if (!firstName) {
+      fieldErrors.firstName = "First name is required";
     }
 
-    if (password !== confirmPassword) {
-      return json({ error: "Passwords do not match" }, { status: 400 });
+    if (!lastName) {
+      fieldErrors.lastName = "Last name is required";
     }
 
-    if (password.length < 8) {
-      return json(
-        { error: "Password must be at least 8 characters long" },
-        { status: 400 }
-      );
+    if (!email) {
+      fieldErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      fieldErrors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      fieldErrors.password = "Password is required";
+    } else if (password.length < 8) {
+      fieldErrors.password = "Password must be at least 8 characters long";
+    }
+
+    if (!confirmPassword) {
+      fieldErrors.confirmPassword = "Please confirm your password";
+    } else if (password !== confirmPassword) {
+      fieldErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(fieldErrors).length > 0) {
+      return json({ fieldErrors }, { status: 400 });
     }
 
     // Call the register API
@@ -99,7 +112,11 @@ export default function Register() {
             </p>
           </div>
 
-          <RegisterForm loading={isSubmitting} error={actionData?.error} />
+          <RegisterForm 
+            loading={isSubmitting} 
+            error={actionData?.error} 
+            fieldErrors={actionData?.fieldErrors}
+          />
         </div>
       </div>
     </MainLayout>
