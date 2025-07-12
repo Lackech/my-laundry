@@ -71,7 +71,7 @@ test.describe("Authentication", () => {
     await page.click('button[type="submit"]');
 
     await expect(
-      page.locator("text=Password must be at least 8 characters long")
+      page.locator(".text-red-600", { hasText: "Password must be at least 8 characters long" })
     ).toBeVisible();
   });
 

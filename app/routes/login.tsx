@@ -22,11 +22,20 @@ export async function action({ request }: ActionFunctionArgs) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    if (!email || !password) {
-      return json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+    const fieldErrors: Record<string, string> = {};
+
+    if (!email) {
+      fieldErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      fieldErrors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      fieldErrors.password = "Password is required";
+    }
+
+    if (Object.keys(fieldErrors).length > 0) {
+      return json({ fieldErrors }, { status: 400 });
     }
 
     // Call the login API
@@ -82,7 +91,11 @@ export default function Login() {
             </p>
           </div>
 
-          <LoginForm loading={isSubmitting} error={actionData?.error} />
+          <LoginForm 
+            loading={isSubmitting} 
+            error={actionData?.error} 
+            fieldErrors={actionData?.fieldErrors}
+          />
         </div>
       </div>
     </MainLayout>

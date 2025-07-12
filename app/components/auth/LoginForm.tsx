@@ -8,9 +8,10 @@ import { Label } from "~/components/ui/label";
 interface LoginFormProps {
   loading?: boolean;
   error?: string;
+  fieldErrors?: Record<string, string>;
 }
 
-export function LoginForm({ loading = false, error }: LoginFormProps) {
+export function LoginForm({ loading = false, error, fieldErrors }: LoginFormProps) {
   return (
     <Card className="mx-auto w-full max-w-md">
       <CardHeader>
@@ -23,7 +24,7 @@ export function LoginForm({ loading = false, error }: LoginFormProps) {
           </Alert>
         )}
 
-        <Form method="post" className="space-y-4">
+        <Form method="post" className="space-y-4" noValidate>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -31,9 +32,11 @@ export function LoginForm({ loading = false, error }: LoginFormProps) {
               name="email"
               type="email"
               placeholder="Enter your email"
-              required
               disabled={loading}
             />
+            {fieldErrors?.email && (
+              <p className="text-sm text-red-600">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -43,9 +46,11 @@ export function LoginForm({ loading = false, error }: LoginFormProps) {
               name="password"
               type="password"
               placeholder="Enter your password"
-              required
               disabled={loading}
             />
+            {fieldErrors?.password && (
+              <p className="text-sm text-red-600">{fieldErrors.password}</p>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
