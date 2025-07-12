@@ -1,23 +1,30 @@
 import { useState, useEffect } from "react";
-import { format, addMinutes, startOfDay, endOfDay } from "date-fns";
+import { format, addMinutes } from "date-fns";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { 
-  generateTimeSlots, 
-  validateBookingRequest, 
+import {
+  generateTimeSlots,
+  validateBookingRequest,
   formatDuration,
-  suggestBookingTime 
+  suggestBookingTime,
 } from "~/lib/calendar-utils";
-import AvailabilityIndicator, { AvailabilityBadge } from "./AvailabilityIndicator";
+import AvailabilityIndicator, {
+  AvailabilityBadge,
+} from "./AvailabilityIndicator";
 import type { Machine, User } from "~/types";
 
 interface TimeSlotPickerProps {
   selectedDate: Date;
   machines: Machine[];
-  onBooking: (startTime: Date, endTime: Date, machineId: string, notes?: string) => void;
+  onBooking: (
+    startTime: Date,
+    endTime: Date,
+    machineId: string,
+    notes?: string
+  ) => void;
   onClose: () => void;
   currentUser: User;
 }
@@ -27,7 +34,6 @@ export default function TimeSlotPicker({
   machines,
   onBooking,
   onClose,
-  currentUser,
 }: TimeSlotPickerProps) {
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<Date | null>(null);
@@ -43,21 +49,21 @@ export default function TimeSlotPicker({
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch(
           `/api/calendar?view=daily&date=${format(selectedDate, "yyyy-MM-dd")}`
         );
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch data: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (!data.success) {
           throw new Error(data.error || "Failed to load calendar data");
         }
-        
+
         if (data.calendar) {
           // Extract all reservations from the calendar data
           const allReservations = data.calendar.flatMap((machineData: any) =>
@@ -69,7 +75,11 @@ export default function TimeSlotPicker({
         }
       } catch (err) {
         console.error("Error fetching reservations:", err);
-        setError(err instanceof Error ? err.message : "Failed to load availability data");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load availability data"
+        );
       } finally {
         setLoading(false);
       }
@@ -124,11 +134,11 @@ export default function TimeSlotPicker({
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <Card className="w-full max-w-md mx-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <Card className="mx-4 w-full max-w-md">
           <CardContent className="p-6 text-center">
             <div className="flex flex-col items-center space-y-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
               <p>Loading availability...</p>
             </div>
           </CardContent>
@@ -140,18 +150,16 @@ export default function TimeSlotPicker({
   // Error state
   if (error) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <Card className="w-full max-w-md mx-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <Card className="mx-4 w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <div className="text-red-600 mb-2">⚠️ Error</div>
-            <p className="text-gray-600 mb-4">{error}</p>
+            <div className="mb-2 text-red-600">⚠️ Error</div>
+            <p className="mb-4 text-gray-600">{error}</p>
             <div className="flex gap-2">
               <Button variant="outline" onClick={onClose}>
                 Close
               </Button>
-              <Button onClick={() => window.location.reload()}>
-                Retry
-              </Button>
+              <Button onClick={() => window.location.reload()}>Retry</Button>
             </div>
           </CardContent>
         </Card>
@@ -160,11 +168,11 @@ export default function TimeSlotPicker({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 md:p-4">
-      <Card className="w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 md:p-4">
+      <Card className="max-h-[95vh] w-full max-w-4xl overflow-hidden md:max-h-[90vh]">
         <CardHeader className="border-b p-4 md:p-6">
-          <div className="flex justify-between items-start md:items-center">
-            <CardTitle className="text-lg md:text-xl pr-4">
+          <div className="flex items-start justify-between md:items-center">
+            <CardTitle className="pr-4 text-lg md:text-xl">
               Book a Machine - {format(selectedDate, "EEEE, MMMM d, yyyy")}
             </CardTitle>
             <Button variant="ghost" onClick={onClose} className="shrink-0">
@@ -173,40 +181,55 @@ export default function TimeSlotPicker({
           </div>
         </CardHeader>
 
-        <CardContent className="p-4 md:p-6 overflow-y-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <CardContent className="overflow-y-auto p-4 md:p-6">
+          <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
             {/* Machine Selection */}
             <div className="space-y-4">
               <div>
-                <Label className="text-base font-semibold">Select Machine</Label>
-                <div className="grid grid-cols-1 gap-2 mt-2">
-                  {machines.map((machine) => (
+                <Label className="text-base font-semibold">
+                  Select Machine
+                </Label>
+                <div className="mt-2 grid grid-cols-1 gap-2">
+                  {machines.map(machine => (
                     <div
                       key={machine.id}
                       className={`
-                        p-2 md:p-3 border rounded-lg cursor-pointer transition-all
-                        ${selectedMachine?.id === machine.id
-                          ? "border-blue-500 bg-blue-50 ring-1 md:ring-2 ring-blue-200"
-                          : "border-gray-200 hover:bg-gray-50"}
-                        ${machine.isOutOfOrder || machine.status !== "AVAILABLE"
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""}
+                        cursor-pointer rounded-lg border p-2 transition-all md:p-3
+                        ${
+                          selectedMachine?.id === machine.id
+                            ? "border-blue-500 bg-blue-50 ring-1 ring-blue-200 md:ring-2"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }
+                        ${
+                          machine.isOutOfOrder || machine.status !== "AVAILABLE"
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                        }
                       `}
                       onClick={() => {
-                        if (!machine.isOutOfOrder && machine.status === "AVAILABLE") {
+                        if (
+                          !machine.isOutOfOrder &&
+                          machine.status === "AVAILABLE"
+                        ) {
                           setSelectedMachine(machine);
                           setSelectedTimeSlot(null);
                           setError(null);
                         }
                       }}
                     >
-                      <div className="flex justify-between items-start">
+                      <div className="flex items-start justify-between">
                         <div>
                           <div className="font-medium">{machine.name}</div>
-                          <div className="text-sm text-gray-600">{machine.location}</div>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="text-sm text-gray-600">
+                            {machine.location}
+                          </div>
+                          <div className="mt-1 flex items-center gap-2">
                             <Badge
-                              variant={machine.type === "WASHER" ? "default" : "secondary"}
+                              variant={
+                                machine.type === "WASHER"
+                                  ? "default"
+                                  : "secondary"
+                              }
                             >
                               {machine.type.toLowerCase()}
                             </Badge>
@@ -222,7 +245,9 @@ export default function TimeSlotPicker({
                             <Badge variant="secondary">{machine.status}</Badge>
                           ) : (
                             <AvailabilityBadge
-                              availability={calculateMachineAvailability(machine)}
+                              availability={calculateMachineAvailability(
+                                machine
+                              )}
                               size="sm"
                             />
                           )}
@@ -238,8 +263,8 @@ export default function TimeSlotPicker({
                 <Label htmlFor="duration" className="text-base font-semibold">
                   Duration
                 </Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {[30, 60, 90, 120].map((mins) => (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[30, 60, 90, 120].map(mins => (
                     <Button
                       key={mins}
                       variant={duration === mins ? "default" : "outline"}
@@ -255,7 +280,14 @@ export default function TimeSlotPicker({
                   id="duration"
                   type="number"
                   value={duration}
-                  onChange={(e) => setDuration(Math.max(30, Math.min(180, parseInt(e.target.value) || 30)))}
+                  onChange={e =>
+                    setDuration(
+                      Math.max(
+                        30,
+                        Math.min(180, parseInt(e.target.value) || 30)
+                      )
+                    )
+                  }
                   min={30}
                   max={180}
                   step={15}
@@ -272,7 +304,7 @@ export default function TimeSlotPicker({
                 <Input
                   id="notes"
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={e => setNotes(e.target.value)}
                   placeholder="Any special notes for your booking..."
                   className="mt-2"
                 />
@@ -294,10 +326,17 @@ export default function TimeSlotPicker({
             {/* Time Slot Selection */}
             <div className="space-y-4">
               <div>
-                <Label className="text-base font-semibold">Available Time Slots</Label>
+                <Label className="text-base font-semibold">
+                  Available Time Slots
+                </Label>
                 {selectedMachine && (
-                  <div className="mt-2 max-h-96 overflow-y-auto space-y-1">
-                    {generateTimeSlots(selectedDate, selectedMachine, reservations, 30).map((slot) => {
+                  <div className="mt-2 max-h-96 space-y-1 overflow-y-auto">
+                    {generateTimeSlots(
+                      selectedDate,
+                      selectedMachine,
+                      reservations,
+                      30
+                    ).map(slot => {
                       const endTime = addMinutes(slot.time, duration);
                       const isValidSlot = validateBookingRequest(
                         slot.time,
@@ -310,12 +349,15 @@ export default function TimeSlotPicker({
                         <div
                           key={slot.timeString}
                           className={`
-                            p-2 md:p-3 border rounded cursor-pointer transition-all
-                            ${selectedTimeSlot?.getTime() === slot.time.getTime()
-                              ? "border-blue-500 bg-blue-50 ring-1 md:ring-2 ring-blue-200"
-                              : slot.isAvailable && isValidSlot
-                              ? "border-green-200 bg-green-50 hover:bg-green-100"
-                              : "border-red-200 bg-red-50 opacity-50 cursor-not-allowed"}
+                            cursor-pointer rounded border p-2 transition-all md:p-3
+                            ${
+                              selectedTimeSlot?.getTime() ===
+                              slot.time.getTime()
+                                ? "border-blue-500 bg-blue-50 ring-1 ring-blue-200 md:ring-2"
+                                : slot.isAvailable && isValidSlot
+                                ? "border-green-200 bg-green-50 hover:bg-green-100"
+                                : "cursor-not-allowed border-red-200 bg-red-50 opacity-50"
+                            }
                           `}
                           onClick={() => {
                             if (slot.isAvailable && isValidSlot) {
@@ -324,7 +366,7 @@ export default function TimeSlotPicker({
                             }
                           }}
                         >
-                          <div className="flex justify-between items-center">
+                          <div className="flex items-center justify-between">
                             <div>
                               <div className="font-medium">
                                 {slot.timeString} - {format(endTime, "HH:mm")}
@@ -335,22 +377,29 @@ export default function TimeSlotPicker({
                             </div>
                             <div>
                               {slot.isAvailable && isValidSlot ? (
-                                <Badge variant="outline" className="text-green-700 border-green-300">
+                                <Badge
+                                  variant="outline"
+                                  className="border-green-300 text-green-700"
+                                >
                                   Available
                                 </Badge>
                               ) : (
                                 <Badge variant="secondary">
-                                  {slot.reservations.length > 0 ? "Booked" : "Unavailable"}
+                                  {slot.reservations.length > 0
+                                    ? "Booked"
+                                    : "Unavailable"}
                                 </Badge>
                               )}
                             </div>
                           </div>
-                          
+
                           {slot.reservations.length > 0 && (
                             <div className="mt-1 text-xs text-gray-600">
                               {slot.reservations.map((reservation: any) => (
                                 <div key={reservation.id}>
-                                  {reservation.isOwner ? "Your booking" : "Reserved"}
+                                  {reservation.isOwner
+                                    ? "Your booking"
+                                    : "Reserved"}
                                 </div>
                               ))}
                             </div>
@@ -366,35 +415,56 @@ export default function TimeSlotPicker({
 
           {/* Error Display */}
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg">
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800">
               {error}
             </div>
           )}
 
           {/* Booking Summary */}
           {selectedMachine && selectedTimeSlot && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">Booking Summary</h4>
+            <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <h4 className="mb-2 font-semibold text-blue-900">
+                Booking Summary
+              </h4>
               <div className="space-y-1 text-sm text-blue-800">
-                <div><strong>Machine:</strong> {selectedMachine.name} ({selectedMachine.type.toLowerCase()})</div>
-                <div><strong>Date:</strong> {format(selectedDate, "EEEE, MMMM d, yyyy")}</div>
-                <div><strong>Time:</strong> {format(selectedTimeSlot, "HH:mm")} - {format(addMinutes(selectedTimeSlot, duration), "HH:mm")}</div>
-                <div><strong>Duration:</strong> {formatDuration(duration)}</div>
-                {notes && <div><strong>Notes:</strong> {notes}</div>}
+                <div>
+                  <strong>Machine:</strong> {selectedMachine.name} (
+                  {selectedMachine.type.toLowerCase()})
+                </div>
+                <div>
+                  <strong>Date:</strong>{" "}
+                  {format(selectedDate, "EEEE, MMMM d, yyyy")}
+                </div>
+                <div>
+                  <strong>Time:</strong> {format(selectedTimeSlot, "HH:mm")} -{" "}
+                  {format(addMinutes(selectedTimeSlot, duration), "HH:mm")}
+                </div>
+                <div>
+                  <strong>Duration:</strong> {formatDuration(duration)}
+                </div>
+                {notes && (
+                  <div>
+                    <strong>Notes:</strong> {notes}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="mt-4 md:mt-6 flex flex-col md:flex-row gap-3">
+          <div className="mt-4 flex flex-col gap-3 md:mt-6 md:flex-row">
             <Button
               onClick={handleBooking}
               disabled={!selectedMachine || !selectedTimeSlot}
-              className="flex-1 order-2 md:order-1"
+              className="order-2 flex-1 md:order-1"
             >
               Confirm Booking
             </Button>
-            <Button variant="outline" onClick={onClose} className="order-1 md:order-2">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="order-1 md:order-2"
+            >
               Cancel
             </Button>
           </div>
@@ -407,10 +477,10 @@ export default function TimeSlotPicker({
     if (machine.isOutOfOrder || machine.status !== "AVAILABLE") {
       return 0;
     }
-    
+
     const slots = generateTimeSlots(selectedDate, machine, reservations, 30);
     const availableSlots = slots.filter(slot => slot.isAvailable);
-    
+
     return slots.length > 0 ? (availableSlots.length / slots.length) * 100 : 0;
   }
 }

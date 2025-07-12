@@ -11,7 +11,11 @@ interface RegisterFormProps {
   fieldErrors?: Record<string, string>;
 }
 
-export function RegisterForm({ loading = false, error, fieldErrors }: RegisterFormProps) {
+export function RegisterForm({
+  loading = false,
+  error,
+  fieldErrors,
+}: RegisterFormProps) {
   return (
     <Card className="mx-auto w-full max-w-md">
       <CardHeader>
@@ -96,7 +100,9 @@ export function RegisterForm({ loading = false, error, fieldErrors }: RegisterFo
               disabled={loading}
             />
             {fieldErrors?.confirmPassword && (
-              <p className="text-sm text-red-600">{fieldErrors.confirmPassword}</p>
+              <p className="text-sm text-red-600">
+                {fieldErrors.confirmPassword}
+              </p>
             )}
           </div>
 

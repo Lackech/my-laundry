@@ -112,9 +112,9 @@ export default function Register() {
             </p>
           </div>
 
-          <RegisterForm 
-            loading={isSubmitting} 
-            error={actionData?.error} 
+          <RegisterForm
+            loading={isSubmitting}
+            error={actionData?.error}
             fieldErrors={actionData?.fieldErrors}
           />
         </div>

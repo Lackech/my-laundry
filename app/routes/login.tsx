@@ -91,9 +91,9 @@ export default function Login() {
             </p>
           </div>
 
-          <LoginForm 
-            loading={isSubmitting} 
-            error={actionData?.error} 
+          <LoginForm
+            loading={isSubmitting}
+            error={actionData?.error}
             fieldErrors={actionData?.fieldErrors}
           />
         </div>

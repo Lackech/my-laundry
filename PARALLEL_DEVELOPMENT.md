@@ -1,6 +1,7 @@
 # Parallel Development System
 
-This system allows you to run 3 implementation agents simultaneously using git worktrees, each working on different features in isolated environments.
+This system allows you to run 3 implementation agents simultaneously using git worktrees, each
+working on different features in isolated environments.
 
 ## 🚀 Quick Start
 
@@ -12,6 +13,7 @@ npm run parallel:setup calendar-integration machine-booking queue-management
 ```
 
 **✨ This now automatically handles:**
+
 - Git worktree creation
 - Environment variable setup (.env files)
 - Prisma client generation and database setup
@@ -34,16 +36,16 @@ npm run parallel:start "Implement a complete laundry booking system with calenda
 
 ## 📋 Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run parallel:setup <f1> <f2> <f3>` | Create 3 parallel worktrees (fully automated) |
-| `npm run parallel:setup-env <worktree-path>` | Set up environment for individual worktree |
-| `npm run parallel:setup-all` | Set up environments for existing worktrees |
-| `npm run parallel:start "<prompt>"` | Show commands to start parallel agents |
-| `npm run parallel:status` | Check status of all development streams |
-| `npm run parallel:terminals` | Open terminal tabs for each worktree |
-| `npm run parallel:integrate <feature>` | Merge completed feature to main |
-| `npm run parallel:cleanup` | Remove all parallel worktrees |
+| Command                                      | Description                                   |
+| -------------------------------------------- | --------------------------------------------- |
+| `npm run parallel:setup <f1> <f2> <f3>`      | Create 3 parallel worktrees (fully automated) |
+| `npm run parallel:setup-env <worktree-path>` | Set up environment for individual worktree    |
+| `npm run parallel:setup-all`                 | Set up environments for existing worktrees    |
+| `npm run parallel:start "<prompt>"`          | Show commands to start parallel agents        |
+| `npm run parallel:status`                    | Check status of all development streams       |
+| `npm run parallel:terminals`                 | Open terminal tabs for each worktree          |
+| `npm run parallel:integrate <feature>`       | Merge completed feature to main               |
+| `npm run parallel:cleanup`                   | Remove all parallel worktrees                 |
 
 ## 🔄 Complete Workflow Example
 
@@ -60,6 +62,7 @@ npm run parallel:terminals
 ### 2. In Each Terminal Tab/Window
 
 **Terminal 1 (User Dashboard):**
+
 ```bash
 cd worktrees/feature/user-dashboard
 # Environment is already set up - ready to code!
@@ -68,14 +71,16 @@ claude --agent implementation_agent "Implement user dashboard with profile manag
 ```
 
 **Terminal 2 (Notifications):**
+
 ```bash
-cd worktrees/feature/notifications  
+cd worktrees/feature/notifications
 # Environment is already set up - ready to code!
 npm run dev  # or npm test
 claude --agent implementation_agent "Implement notification system with email alerts, in-app notifications, and user preferences"
 ```
 
 **Terminal 3 (Admin Panel):**
+
 ```bash
 cd worktrees/feature/admin-panel
 # Environment is already set up - ready to code!
@@ -109,16 +114,19 @@ npm run parallel:cleanup
 ## 🎯 Recommended Feature Combinations
 
 ### High-Impact Features (Medium Conflict Risk)
+
 - **Stream 1:** Calendar Integration & Booking
 - **Stream 2:** Machine Management & Status
 - **Stream 3:** Queue System & Notifications
 
 ### Low-Conflict Features (Recommended)
+
 - **Stream 1:** User Dashboard & Profile
 - **Stream 2:** Notification System
 - **Stream 3:** Admin Panel & Analytics
 
 ### Advanced Features
+
 - **Stream 1:** Mobile Responsive Design
 - **Stream 2:** Real-time Updates (WebSockets)
 - **Stream 3:** Payment Integration
@@ -128,12 +136,14 @@ npm run parallel:cleanup
 In each worktree terminal, use one of these patterns:
 
 ### Using Claude Code with Custom Agent
+
 ```bash
 # Use the implementation agent from .claude/commands/
 claude --agent implementation_agent "Implement [feature description]"
 ```
 
 ### Using the Parallel Implementation Orchestrator
+
 ```bash
 # Use the specialized parallel agent
 claude --agent parallel_implementation_agent "Coordinate implementation of [features]"
@@ -147,7 +157,7 @@ my-laundry/
 ├── worktrees/
 │   ├── feature/
 │   │   ├── user-dashboard/       # Independent copy with deps
-│   │   ├── notifications/        # Independent copy with deps  
+│   │   ├── notifications/        # Independent copy with deps
 │   │   └── admin-panel/          # Independent copy with deps
 ├── scripts/
 │   ├── worktree.sh              # Git worktree management
@@ -167,18 +177,21 @@ my-laundry/
 ## 🔧 Technical Details
 
 ### Git Worktree Benefits
+
 - Each worktree is a complete, independent working copy
 - Shared git history but isolated working directories
 - Independent package installations and dependencies
 - Parallel testing and development possible
 
 ### Agent Coordination
+
 - Each implementation agent works in focused scope
 - Clear boundaries prevent overlap
 - Systematic integration process
 - Quality gates at each step
 
 ### Integration Strategy
+
 - Features designed for clean merging
 - Testing required before integration
 - Progressive integration maintains stability
@@ -197,6 +210,7 @@ my-laundry/
 ### Common Issues
 
 **Worktree Creation Fails:**
+
 ```bash
 # Clean up and try again
 npm run parallel:cleanup
@@ -204,6 +218,7 @@ npm run parallel:setup <f1> <f2> <f3>
 ```
 
 **Merge Conflicts:**
+
 ```bash
 # Sync worktree with main first
 cd worktrees/feature/your-feature
@@ -212,6 +227,7 @@ git rebase origin/main
 ```
 
 **Dependencies Out of Sync:**
+
 ```bash
 # Reinstall dependencies in worktree
 cd worktrees/feature/your-feature

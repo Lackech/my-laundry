@@ -15,7 +15,7 @@ export default function AvailabilityIndicator({
 }: AvailabilityIndicatorProps) {
   // Normalize availability to 0-100 range
   const normalizedAvailability = Math.max(0, Math.min(100, availability));
-  
+
   // Determine color based on availability percentage
   const getAvailabilityColor = (percentage: number) => {
     if (percentage >= 75) return "bg-green-500";
@@ -50,10 +50,12 @@ export default function AvailabilityIndicator({
       {/* Progress Bar */}
       <div
         className={cn(
-          "w-full bg-gray-200 rounded-full overflow-hidden",
+          "w-full overflow-hidden rounded-full bg-gray-200",
           sizeClasses
         )}
-        title={`${Math.round(normalizedAvailability)}% available - ${getAvailabilityText(normalizedAvailability)}`}
+        title={`${Math.round(
+          normalizedAvailability
+        )}% available - ${getAvailabilityText(normalizedAvailability)}`}
       >
         <div
           className={cn(
@@ -85,7 +87,7 @@ export function AvailabilityDot({
   className?: string;
 }) {
   const normalizedAvailability = Math.max(0, Math.min(100, availability));
-  
+
   const getAvailabilityColor = (percentage: number) => {
     if (percentage >= 75) return "bg-green-500";
     if (percentage >= 50) return "bg-yellow-500";
@@ -109,12 +111,7 @@ export function AvailabilityDot({
 
   return (
     <div
-      className={cn(
-        "rounded-full",
-        colorClass,
-        sizeClasses,
-        className
-      )}
+      className={cn("rounded-full", colorClass, sizeClasses, className)}
       title={`${Math.round(normalizedAvailability)}% available`}
     />
   );
@@ -131,7 +128,7 @@ export function AvailabilityText({
   className?: string;
 }) {
   const normalizedAvailability = Math.max(0, Math.min(100, availability));
-  
+
   const getAvailabilityStatus = (percentage: number) => {
     if (percentage >= 75) return { text: "Available", color: "text-green-600" };
     if (percentage >= 50) return { text: "Moderate", color: "text-yellow-600" };
@@ -155,12 +152,7 @@ export function AvailabilityText({
 
   return (
     <span
-      className={cn(
-        "font-medium",
-        status.color,
-        sizeClasses,
-        className
-      )}
+      className={cn("font-medium", status.color, sizeClasses, className)}
       title={`${Math.round(normalizedAvailability)}% available`}
     >
       {status.text}
@@ -179,11 +171,23 @@ export function AvailabilityBadge({
   className?: string;
 }) {
   const normalizedAvailability = Math.max(0, Math.min(100, availability));
-  
+
   const getAvailabilityStatus = (percentage: number) => {
-    if (percentage >= 75) return { text: "Available", color: "bg-green-100 text-green-800 border-green-200" };
-    if (percentage >= 50) return { text: "Moderate", color: "bg-yellow-100 text-yellow-800 border-yellow-200" };
-    if (percentage >= 25) return { text: "Limited", color: "bg-orange-100 text-orange-800 border-orange-200" };
+    if (percentage >= 75)
+      return {
+        text: "Available",
+        color: "bg-green-100 text-green-800 border-green-200",
+      };
+    if (percentage >= 50)
+      return {
+        text: "Moderate",
+        color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      };
+    if (percentage >= 25)
+      return {
+        text: "Limited",
+        color: "bg-orange-100 text-orange-800 border-orange-200",
+      };
     return { text: "Busy", color: "bg-red-100 text-red-800 border-red-200" };
   };
 
@@ -204,7 +208,7 @@ export function AvailabilityBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center font-medium rounded-full border",
+        "inline-flex items-center rounded-full border font-medium",
         status.color,
         sizeClasses,
         className

@@ -36,15 +36,15 @@ test.describe("Home Page", () => {
     // Check that navigation links are keyboard accessible
     const logoLink = page.locator('header a[href="/"]').first();
     const signInButton = page.locator('header nav a[href="/login"]');
-    
+
     // Verify navigation elements are accessible and visible
     await expect(logoLink).toBeVisible();
     await expect(signInButton).toBeVisible();
-    
+
     // Test focus capability - essential for keyboard accessibility
     await logoLink.focus();
     await expect(logoLink).toBeFocused();
-    
+
     // Test that navigation buttons can receive focus
     await signInButton.focus();
     await expect(signInButton).toBeFocused();

@@ -13,9 +13,8 @@ import {
   addMinutes,
   differenceInMinutes,
   isWithinInterval,
-  parseISO,
 } from "date-fns";
-import type { Reservation, Machine } from "~/types";
+import type { Machine } from "~/types";
 
 export interface CalendarDay {
   date: Date;
@@ -114,7 +113,7 @@ export function generateTimeSlots(
       const slotEnd = addMinutes(slotTime, slotDuration);
 
       // Check if slot conflicts with any reservation
-      const conflictingReservations = reservations.filter((reservation) =>
+      const conflictingReservations = reservations.filter(reservation =>
         isTimeSlotConflicting(slotTime, slotEnd, reservation)
       );
 
@@ -173,7 +172,7 @@ export function calculateDayAvailability(
 
   const dayStart = startOfDay(targetDate);
   const dayEnd = endOfDay(targetDate);
-  
+
   // Operating hours: 6 AM to 11 PM = 17 hours = 1020 minutes
   const totalOperatingMinutes = 17 * 60;
 
@@ -212,7 +211,10 @@ export function calculateDayAvailability(
     return total + differenceInMinutes(overlapEnd, overlapStart);
   }, 0);
 
-  return Math.max(0, ((totalOperatingMinutes - reservedMinutes) / totalOperatingMinutes) * 100);
+  return Math.max(
+    0,
+    ((totalOperatingMinutes - reservedMinutes) / totalOperatingMinutes) * 100
+  );
 }
 
 /**
@@ -229,12 +231,17 @@ export function getNextAvailableSlot(
   }
 
   const searchDate = startOfDay(startDate);
-  
+
   // Search for the next 7 days
   for (let day = 0; day < 7; day++) {
     const currentDay = addDays(searchDate, day);
-    const timeSlots = generateTimeSlots(currentDay, machine, reservations, durationMinutes);
-    
+    const timeSlots = generateTimeSlots(
+      currentDay,
+      machine,
+      reservations,
+      durationMinutes
+    );
+
     const availableSlot = timeSlots.find(slot => slot.isAvailable);
     if (availableSlot) {
       return availableSlot.time;
@@ -270,9 +277,12 @@ export function validateBookingRequest(
   // Check if booking is within operating hours
   const startHour = startTime.getHours();
   const endHour = endTime.getHours();
-  
+
   if (startHour < 6 || endHour > 23) {
-    return { isValid: false, error: "Booking must be within operating hours (6 AM - 11 PM)" };
+    return {
+      isValid: false,
+      error: "Booking must be within operating hours (6 AM - 11 PM)",
+    };
   }
 
   // Check if duration is reasonable (minimum 30 minutes, maximum 3 hours)
@@ -286,14 +296,18 @@ export function validateBookingRequest(
   }
 
   // Check for conflicts with existing reservations
-  const hasConflict = reservations.some((reservation) =>
-    reservation.machineId === machine.id &&
-    reservation.status === "ACTIVE" &&
-    isTimeSlotConflicting(startTime, endTime, reservation)
+  const hasConflict = reservations.some(
+    reservation =>
+      reservation.machineId === machine.id &&
+      reservation.status === "ACTIVE" &&
+      isTimeSlotConflicting(startTime, endTime, reservation)
   );
 
   if (hasConflict) {
-    return { isValid: false, error: "Time slot conflicts with existing reservation" };
+    return {
+      isValid: false,
+      error: "Time slot conflicts with existing reservation",
+    };
   }
 
   return { isValid: true };
@@ -320,7 +334,9 @@ export function formatDuration(minutes: number): string {
 /**
  * Groups reservations by date for easy calendar rendering
  */
-export function groupReservationsByDate(reservations: Reservation[]): Record<string, Reservation[]> {
+export function groupReservationsByDate(
+  reservations: Reservation[]
+): Record<string, Reservation[]> {
   return reservations.reduce((groups, reservation) => {
     const dateKey = format(new Date(reservation.startTime), "yyyy-MM-dd");
     if (!groups[dateKey]) {
@@ -341,8 +357,13 @@ export function suggestBookingTime(
   durationMinutes: number = 30
 ): { startTime: Date; endTime: Date } | null {
   const searchDate = preferredDate || new Date();
-  const nextAvailable = getNextAvailableSlot(machine, reservations, searchDate, durationMinutes);
-  
+  const nextAvailable = getNextAvailableSlot(
+    machine,
+    reservations,
+    searchDate,
+    durationMinutes
+  );
+
   if (!nextAvailable) {
     return null;
   }

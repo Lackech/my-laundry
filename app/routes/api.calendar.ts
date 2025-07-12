@@ -35,7 +35,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       return await getMonthlyCalendar(user, targetDate, machineId);
     } else {
       return json(
-        { error: 'Invalid view parameter. Use "daily", "weekly", or "monthly"' },
+        {
+          error: 'Invalid view parameter. Use "daily", "weekly", or "monthly"',
+        },
         { status: 400 }
       );
     }
@@ -364,7 +366,7 @@ async function getMonthlyCalendar(
 ) {
   const startDate = startOfMonth(targetDate);
   const endDate = endOfMonth(targetDate);
-  
+
   // Extend to full calendar view (include previous/next month days)
   const calendarStart = startOfWeek(startDate, { weekStartsOn: 1 }); // Monday
   const calendarEnd = endOfWeek(endDate, { weekStartsOn: 1 }); // Sunday
@@ -466,7 +468,8 @@ async function getMonthlyCalendar(
       dayNumber: parseInt(format(currentDate, "d")),
       dayName: format(currentDate, "EEEE"),
       dayShort: format(currentDate, "EEE"),
-      isToday: format(currentDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd"),
+      isToday:
+        format(currentDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd"),
       isCurrentMonth: currentDate >= startDate && currentDate <= endDate,
       isWeekend: [0, 6].includes(currentDate.getDay()),
     };

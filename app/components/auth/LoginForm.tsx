@@ -11,7 +11,11 @@ interface LoginFormProps {
   fieldErrors?: Record<string, string>;
 }
 
-export function LoginForm({ loading = false, error, fieldErrors }: LoginFormProps) {
+export function LoginForm({
+  loading = false,
+  error,
+  fieldErrors,
+}: LoginFormProps) {
   return (
     <Card className="mx-auto w-full max-w-md">
       <CardHeader>

@@ -1,16 +1,20 @@
-import { type LoaderFunctionArgs, type ActionFunctionArgs, json } from "@remix-run/node";
+import {
+  type LoaderFunctionArgs,
+  type ActionFunctionArgs,
+  json,
+} from "@remix-run/node";
 import { useLoaderData, useFetcher, useSearchParams } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { db } from "~/lib/db.server";
 import { requireEmailVerification } from "~/lib/auth.middleware";
 import logger from "~/lib/logger";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import CalendarView from "~/components/calendar/CalendarView";
 import TimeSlotPicker from "~/components/calendar/TimeSlotPicker";
 import { generateMonthlyCalendar } from "~/lib/calendar-utils";
-import type { Machine, Reservation, User } from "~/types";
+import type { Machine, User } from "~/types";
 import { format, addMonths, subMonths } from "date-fns";
 
 interface LoaderData {
@@ -26,14 +30,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   try {
     const user = await requireEmailVerification(request);
     const url = new URL(request.url);
-    
+
     // Parse query parameters
-    const view = (url.searchParams.get("view") as "monthly" | "weekly" | "daily") || "monthly";
+    const view =
+      (url.searchParams.get("view") as "monthly" | "weekly" | "daily") ||
+      "monthly";
     const dateParam = url.searchParams.get("date");
     const machineId = url.searchParams.get("machineId");
-    
+
     const currentDate = dateParam ? new Date(dateParam) : new Date();
-    
+
     // Fetch machines
     const machines = await db.machine.findMany({
       where: {
@@ -43,8 +49,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
 
     // Get selected machine if specified
-    const selectedMachine = machineId 
-      ? machines.find(m => m.id === machineId) 
+    const selectedMachine = machineId
+      ? machines.find(m => m.id === machineId)
       : undefined;
 
     // Fetch calendar data based on view
@@ -54,7 +60,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
     } else {
       // For weekly/daily, use existing API logic
       const response = await fetch(
-        `${url.origin}/api/calendar?view=${view}&date=${format(currentDate, "yyyy-MM-dd")}${machineId ? `&machineId=${machineId}` : ""}`,
+        `${url.origin}/api/calendar?view=${view}&date=${format(
+          currentDate,
+          "yyyy-MM-dd"
+        )}${machineId ? `&machineId=${machineId}` : ""}`,
         {
           headers: {
             Cookie: request.headers.get("Cookie") || "",
@@ -102,7 +111,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
       // Validate booking data
       if (!machineId || !startTime || !endTime) {
-        return json({ error: "Missing required booking information" }, { status: 400 });
+        return json(
+          { error: "Missing required booking information" },
+          { status: 400 }
+        );
       }
 
       const start = new Date(startTime);
@@ -141,7 +153,9 @@ export async function action({ request }: ActionFunctionArgs) {
           machineId,
           startTime: start,
           endTime: end,
-          estimatedDuration: Math.round((end.getTime() - start.getTime()) / (1000 * 60)),
+          estimatedDuration: Math.round(
+            (end.getTime() - start.getTime()) / (1000 * 60)
+          ),
           notes: notes || undefined,
         },
         include: {
@@ -169,10 +183,14 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-async function getMonthlyCalendarData(currentDate: Date, machineId?: string | null) {
+async function getMonthlyCalendarData(
+  currentDate: Date,
+  machineId?: string | null
+) {
   const monthCalendar = generateMonthlyCalendar(currentDate);
   const startDate = monthCalendar.weeks[0].days[0].date;
-  const endDate = monthCalendar.weeks[monthCalendar.weeks.length - 1].days[6].date;
+  const endDate =
+    monthCalendar.weeks[monthCalendar.weeks.length - 1].days[6].date;
 
   // Fetch reservations for the entire calendar view
   const reservations = await db.reservation.findMany({
@@ -220,7 +238,8 @@ async function getMonthlyCalendarData(currentDate: Date, machineId?: string | nu
 }
 
 export default function CalendarPage() {
-  const { user, machines, currentDate, calendar, view, selectedMachine } = useLoaderData<LoaderData>();
+  const { user, machines, currentDate, calendar, view, selectedMachine } =
+    useLoaderData<LoaderData>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showTimeSlotPicker, setShowTimeSlotPicker] = useState(false);
@@ -232,13 +251,14 @@ export default function CalendarPage() {
 
   // Navigation handlers
   const navigateMonth = (direction: "prev" | "next") => {
-    const newDate = direction === "prev" 
-      ? subMonths(currentViewDate, 1)
-      : addMonths(currentViewDate, 1);
-    
+    const newDate =
+      direction === "prev"
+        ? subMonths(currentViewDate, 1)
+        : addMonths(currentViewDate, 1);
+
     setCalendarLoading(true);
     setCalendarError(null);
-    
+
     const newParams = new URLSearchParams(searchParams);
     newParams.set("date", format(newDate, "yyyy-MM-dd"));
     setSearchParams(newParams);
@@ -247,7 +267,7 @@ export default function CalendarPage() {
   const changeView = (newView: "monthly" | "weekly" | "daily") => {
     setCalendarLoading(true);
     setCalendarError(null);
-    
+
     const newParams = new URLSearchParams(searchParams);
     newParams.set("view", newView);
     setSearchParams(newParams);
@@ -256,7 +276,7 @@ export default function CalendarPage() {
   const selectMachine = (machineId: string | null) => {
     setCalendarLoading(true);
     setCalendarError(null);
-    
+
     const newParams = new URLSearchParams(searchParams);
     if (machineId) {
       newParams.set("machineId", machineId);
@@ -274,7 +294,7 @@ export default function CalendarPage() {
 
   // Handle booking errors
   useEffect(() => {
-    if (fetcher.data && 'error' in fetcher.data && fetcher.data.error) {
+    if (fetcher.data && "error" in fetcher.data && fetcher.data.error) {
       setCalendarError(fetcher.data.error as string);
     }
   }, [fetcher.data]);
@@ -284,7 +304,12 @@ export default function CalendarPage() {
     setShowTimeSlotPicker(true);
   };
 
-  const handleBooking = (startTime: Date, endTime: Date, machineId: string, notes?: string) => {
+  const handleBooking = (
+    startTime: Date,
+    endTime: Date,
+    machineId: string,
+    notes?: string
+  ) => {
     fetcher.submit(
       {
         intent: "book",
@@ -300,14 +325,18 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="container mx-auto p-2 md:p-4 space-y-4 md:space-y-6">
+    <div className="container mx-auto space-y-4 p-2 md:space-y-6 md:p-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+      <div className="flex flex-col items-start justify-between space-y-4 md:flex-row md:items-center md:space-y-0">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Laundry Calendar</h1>
-          <p className="text-sm md:text-base text-gray-600">Book machines and view availability</p>
+          <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+            Laundry Calendar
+          </h1>
+          <p className="text-sm text-gray-600 md:text-base">
+            Book machines and view availability
+          </p>
         </div>
-        
+
         {/* View Toggle */}
         <div className="flex flex-wrap gap-2">
           <Button
@@ -348,10 +377,12 @@ export default function CalendarPage() {
             >
               All Machines
             </Button>
-            {machines.map((machine) => (
+            {machines.map(machine => (
               <Button
                 key={machine.id}
-                variant={selectedMachine?.id === machine.id ? "default" : "outline"}
+                variant={
+                  selectedMachine?.id === machine.id ? "default" : "outline"
+                }
                 onClick={() => selectMachine(machine.id)}
                 size="sm"
               >
@@ -370,20 +401,14 @@ export default function CalendarPage() {
 
       {/* Calendar Navigation */}
       {view === "monthly" && (
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={() => navigateMonth("prev")}
-          >
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={() => navigateMonth("prev")}>
             ← Previous
           </Button>
           <h2 className="text-xl font-semibold">
             {format(currentViewDate, "MMMM yyyy")}
           </h2>
-          <Button
-            variant="outline"
-            onClick={() => navigateMonth("next")}
-          >
+          <Button variant="outline" onClick={() => navigateMonth("next")}>
             Next →
           </Button>
         </div>
@@ -391,21 +416,21 @@ export default function CalendarPage() {
 
       {/* Loading States */}
       {fetcher.state === "submitting" && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
+        <div className="rounded border border-blue-200 bg-blue-50 px-4 py-3 text-blue-800">
           Creating your reservation...
         </div>
       )}
 
       {/* Error Messages */}
-      {fetcher.data && 'error' in fetcher.data && fetcher.data.error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+      {fetcher.data && "error" in fetcher.data && fetcher.data.error && (
+        <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-800">
           {fetcher.data.error as string}
         </div>
       )}
 
       {/* Success Messages */}
-      {fetcher.data && 'success' in fetcher.data && fetcher.data.success && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+      {fetcher.data && "success" in fetcher.data && fetcher.data.success && (
+        <div className="rounded border border-green-200 bg-green-50 px-4 py-3 text-green-800">
           Reservation created successfully!
         </div>
       )}
